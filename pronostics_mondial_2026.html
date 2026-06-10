@@ -23,6 +23,10 @@ header{background:linear-gradient(135deg,#080b14 0%,#151d32 60%,#080b14 100%);bo
 .scard .sub2{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-top:1px}
 .nav{background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;overflow-x:auto;position:sticky;top:68px;z-index:190;scrollbar-width:none}
 .nav#fb-status{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0}
+.finale-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--gold);background:#1a1500;border:1px solid var(--gold);border-radius:4px;padding:4px 12px;margin-bottom:12px;text-transform:uppercase}
+.finale-badge.third{color:#b0b8c8;background:#0e1018;border-color:#4a5878}
+.finale-sep{height:2px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:28px 0}
+.prono-ts{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);text-align:center;margin-top:3px;min-height:10px;opacity:.7;letter-spacing:0.3px}
 ::-webkit-scrollbar{display:none}
 .nav-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:10px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0}
 .nav-btn:hover{color:var(--text)}.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
@@ -484,10 +488,21 @@ function resCell(mid,isKO){
   return`<td class="res">${o||'–'}</td>`
 }
 
+function fmtTs(ts){
+  if(!ts)return'';
+  const d=new Date(ts);
+  const days=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const months=['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
+  return`${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
 function pronoCell(mid,pl,isKO){
-  const pr=(isKO?KP:SP)[mid]?.[pl]||null;
+  const store=(isKO?KP:SP)[mid]||{};
+  const pr=store[pl]||null;
+  const ts=store['ts_'+pl]||null;
   const b=v=>`<button class="pb ${pr===v?'s'+v:''}" data-mid="${mid}" data-pl="${pl}" data-ko="${isKO?1:0}">${v}</button>`;
-  return`<td class="pro"><div class="pbr">${b('1')}${b('N')}${b('2')}</div></td>`
+  const tsHtml=ts?`<div class="prono-ts">${fmtTs(ts)}</div>`:`<div class="prono-ts"></div>`;
+  return`<td class="pro"><div class="pbr">${b('1')}${b('N')}${b('2')}</div>${tsHtml}</td>`
 }
 
 function ptsCell(mid,pl,mult,isKO){
@@ -551,31 +566,57 @@ function renderGroupes(){
   document.getElementById('tab-groupes').innerHTML=h;
 }
 
+function koMatchRow(phase,i,mult){
+  const dt=KO_DATES[phase][i];
+  const mid=kid(phase,i);
+  const teams=koTeams(phase,i);
+  return`<tr>
+    ${dtc(dt.d,dt.hr)}
+    ${koTeamCell(teams.h)}
+    ${scoreCell(mid,true)}
+    ${koTeamCell(teams.a)}
+    ${resCell(mid,true)}
+    ${pronoCell(mid,'p',true)}
+    ${ptsCell(mid,'p',mult,true)}
+    ${pronoCell(mid,'s',true)}
+    ${ptsCell(mid,'s',mult,true)}
+    ${pronoCell(mid,'l',true)}
+    ${ptsCell(mid,'l',mult,true)}
+  </tr>`;
+}
+
 function renderKO(phase){
-  const dates=KO_DATES[phase];
   const mult=KO_PTS[phase];
   const label=KO_LABELS[phase];
+
+  if(phase==='finale'){
+    // Affichage séparé : Finale + Match pour la 3e place
+    let h=``;
+
+    // 🏆 LA GRANDE FINALE
+    h+=`<div class="phase-hd"><h2>🏆 GRANDE FINALE</h2><span class="pb">${mult} pts / bonne prono</span></div>`;
+    h+=`<div class="finale-badge">Match pour le titre mondial — dim. 26 juillet 2026</div>`;
+    h+=`<div class="tbl-wrap"><table>${tableHead()}<tbody>`;
+    h+=koMatchRow(phase,0,mult);
+    h+=`</tbody></table></div>`;
+
+    // Séparateur
+    h+=`<div class="finale-sep"></div>`;
+
+    // 🥉 MATCH POUR LA 3E PLACE
+    h+=`<div class="phase-hd"><h2>🥉 MATCH POUR LA 3E PLACE</h2><span class="pb">${mult} pts / bonne prono</span></div>`;
+    h+=`<div class="finale-badge third">Petite finale — sam. 25 juillet 2026</div>`;
+    h+=`<div class="tbl-wrap"><table>${tableHead()}<tbody>`;
+    h+=koMatchRow(phase,1,mult);
+    h+=`</tbody></table></div>`;
+
+    document.getElementById('tab-finale').innerHTML=h;
+    return;
+  }
+
   let h=`<div class="phase-hd"><h2>${label}</h2><span class="pb">${mult} pts / bonne prono</span></div>`;
   h+=`<div class="tbl-wrap"><table>${tableHead()}<tbody>`;
-
-  dates.forEach((dt,i)=>{
-    const mid=kid(phase,i);
-    const teams=koTeams(phase,i);
-    h+=`<tr>
-      ${dtc(dt.d,dt.hr)}
-      ${koTeamCell(teams.h)}
-      ${scoreCell(mid,true)}
-      ${koTeamCell(teams.a)}
-      ${resCell(mid,true)}
-      ${pronoCell(mid,'p',true)}
-      ${ptsCell(mid,'p',mult,true)}
-      ${pronoCell(mid,'s',true)}
-      ${ptsCell(mid,'s',mult,true)}
-      ${pronoCell(mid,'l',true)}
-      ${ptsCell(mid,'l',mult,true)}
-    </tr>`;
-  });
-
+  KO_DATES[phase].forEach((_,i)=>{ h+=koMatchRow(phase,i,mult); });
   h+=`</tbody></table></div>`;
   document.getElementById(`tab-${phase}`).innerHTML=h;
 }
@@ -754,7 +795,13 @@ function bindEvents(){
     const path  = ko==='1' ? 'KP' : 'SP';
     if(!store[mid]) store[mid]={};
     const v=e.target.textContent;
-    if(store[mid][pl]===v) delete store[mid][pl]; else store[mid][pl]=v;
+    if(store[mid][pl]===v){
+      delete store[mid][pl];
+      delete store[mid]['ts_'+pl];
+    } else {
+      store[mid][pl]=v;
+      store[mid]['ts_'+pl]=Date.now();
+    }
     fbSet(`data/${path}/${mid}`, store[mid]);
   }));
 }
