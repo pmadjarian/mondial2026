@@ -340,12 +340,12 @@ function isKOMatchLocked(phase,i){
 }
 
 // ══════════════════════════════════════════
-//  API FOOTBALL-DATA.ORG — scores auto
+//  SCORES AUTOMATIQUES via proxy CORS
 // ══════════════════════════════════════════
-const FD_KEY = '39f7cccc0af24e6ebc1a64bfb4a7f4da';
-const FD_URL = 'https://api.football-data.org/v4/competitions/WC/matches?season=2026';
+const FD_KEY  = '39f7cccc0af24e6ebc1a64bfb4a7f4da';
+const FD_BASE = 'https://api.football-data.org/v4/competitions/WC/matches?season=2026';
+const PROXY   = 'https://api.allorigins.win/get?url=';
 
-// Correspondance noms API -> noms dans G
 const TEAM_MAP = {
   'Mexico':'Mexique','South Africa':'Afrique du Sud',
   'Korea Republic':'Corée du Sud','Czechia':'Tchéquie','Czech Republic':'Tchéquie',
@@ -356,65 +356,58 @@ const TEAM_MAP = {
   'Australia':'Australie','Turkey':'Turquie','Türkiye':'Turquie',
   'Germany':'Allemagne','Curaçao':'Curaçao',
   "Côte d'Ivoire":"Côte d'Ivoire",'Ivory Coast':"Côte d'Ivoire",
-  'Ecuador':'Équateur',
-  'Netherlands':'Pays-Bas','Japan':'Japon','Sweden':'Suède','Tunisia':'Tunisie',
-  'Belgium':'Belgique','Egypt':'Égypte','Iran':'Iran','New Zealand':'Nouvelle-Zélande',
-  'Spain':'Espagne','Cape Verde':'Cap-Vert','Saudi Arabia':'Arabie Saoudite','Uruguay':'Uruguay',
+  'Ecuador':'Équateur','Netherlands':'Pays-Bas','Japan':'Japon',
+  'Sweden':'Suède','Tunisia':'Tunisie','Belgium':'Belgique',
+  'Egypt':'Égypte','Iran':'Iran','New Zealand':'Nouvelle-Zélande',
+  'Spain':'Espagne','Cape Verde':'Cap-Vert',
+  'Saudi Arabia':'Arabie Saoudite','Uruguay':'Uruguay',
   'France':'France','Senegal':'Sénégal','Iraq':'Irak','Norway':'Norvège',
   'Argentina':'Argentine','Algeria':'Algérie','Austria':'Autriche','Jordan':'Jordanie',
-  'Portugal':'Portugal','DR Congo':'RD Congo','Uzbekistan':'Ouzbékistan','Colombia':'Colombie',
-  'England':'Angleterre','Croatia':'Croatie','Ghana':'Ghana','Panama':'Panama',
+  'Portugal':'Portugal','DR Congo':'RD Congo','Uzbekistan':'Ouzbékistan',
+  'Colombia':'Colombie','England':'Angleterre','Croatia':'Croatie',
+  'Ghana':'Ghana','Panama':'Panama',
 };
 
-function normTeam(name){ return TEAM_MAP[name]||name; }
-
 async function fetchScores(){
-  try{
-    const r = await fetch(FD_URL, {headers:{'X-Auth-Token':FD_KEY}});
-    if(!r.ok) return;
-    const data = await r.json();
-    const matches = data.matches||[];
+  const url = PROXY + encodeURIComponent(FD_BASE + '&X-Auth-Token=' + FD_KEY);
+  try {
+    const r = await fetch(url);
+    if(!r.ok){ console.warn('Proxy error:', r.status); return; }
+    const wrapper = await r.json();
+    const data = JSON.parse(wrapper.contents);
+    const matches = data.matches || [];
     let changed = false;
-
     matches.forEach(m=>{
-      const status = m.status; // FINISHED, IN_PLAY, PAUSED, TIMED, SCHEDULED
-      if(status!=='FINISHED' && status!=='IN_PLAY' && status!=='PAUSED') return;
-      const hScore = m.score?.fullTime?.home;
-      const aScore = m.score?.fullTime?.away;
-      // Pour les matchs en cours, prendre halfTime ou current
+      const status = m.status;
+      if(status !== 'FINISHED' && status !== 'IN_PLAY' && status !== 'PAUSED') return;
       const hLive = m.score?.fullTime?.home ?? m.score?.halfTime?.home;
       const aLive = m.score?.fullTime?.away ?? m.score?.halfTime?.away;
-      if(hLive==null || aLive==null) return;
-
-      const hTeam = normTeam(m.homeTeam?.name||'');
-      const aTeam = normTeam(m.awayTeam?.name||'');
-
-      // Chercher dans les groupes
+      if(hLive == null || aLive == null) return;
+      const hTeam = TEAM_MAP[m.homeTeam?.name] || m.homeTeam?.name || '';
+      const aTeam = TEAM_MAP[m.awayTeam?.name] || m.awayTeam?.name || '';
       for(const g of Object.keys(G)){
-        for(let i=0;i<G[g].m.length;i++){
-          const gm=G[g].m[i];
-          if(gm.h===hTeam && gm.a===aTeam){
-            const mid=gid(g,i);
-            const cur=SR[mid]||{};
-            if(String(cur.h)!==String(hLive)||String(cur.a)!==String(aLive)){
-              SR[mid]={h:String(hLive),a:String(aLive)};
-              fbSet('data/SR/'+mid, SR[mid]);
-              changed=true;
+        for(let i = 0; i < G[g].m.length; i++){
+          const gm = G[g].m[i];
+          if(gm.h === hTeam && gm.a === aTeam){
+            const mid = gid(g, i);
+            const cur = SR[mid] || {};
+            if(String(cur.h) !== String(hLive) || String(cur.a) !== String(aLive)){
+              SR[mid] = {h: String(hLive), a: String(aLive)};
+              window.fbSet('data/SR/' + mid, SR[mid]);
+              changed = true;
+              console.log('Score:', hTeam, hLive, '-', aLive, aTeam);
             }
             return;
           }
         }
       }
-      // KO : on ne peut pas matcher facilement sans ID FIFA, on skip pour l'instant
     });
-
     if(changed) render();
   } catch(e){
-    console.warn('API fetch error:',e);
+    console.warn('Fetch scores erreur:', e.message);
   }
 }
 
-// Lancer le fetch au chargement, puis toutes les 2 minutes
 function startScorePolling(){
   fetchScores();
   setInterval(fetchScores, 120000);
@@ -939,7 +932,7 @@ try {
   window.fbSet = function(){};
 }
 
-// 3. Polling des scores API (toutes les 2 min)
+// Démarrer le polling des scores
 startScorePolling();
 </script>
 </body>
