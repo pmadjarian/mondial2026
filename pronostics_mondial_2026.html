@@ -32,6 +32,8 @@ td.pro.locked{background:rgba(0,0,0,.15)}
 tr.row-started td.dt .tl{color:var(--green)}
 tr.row-started td.dt::after{content:'▶';font-size:7px;color:var(--green);margin-left:3px;vertical-align:middle}
 .prono-ts{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);text-align:center;margin-top:3px;min-height:10px;opacity:.7;letter-spacing:0.3px}
+.version-badge{position:absolute;top:8px;right:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:2px 6px;letter-spacing:1px;opacity:.7}
+header{position:relative}
 ::-webkit-scrollbar{display:none}
 .nav-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:10px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0}
 .nav-btn:hover{color:var(--text)}.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
@@ -165,6 +167,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
+  <div class="version-badge">v1.5</div>
 </header>
 <nav class="nav">
   <button class="nav-btn active" data-tab="groupes">Groupes</button>
@@ -191,39 +194,6 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
-// ── Firebase init (compat SDK, pas de modules ES) ──
-const firebaseConfig = {
-  apiKey: "AIzaSyCDWqSy-WfuC5c4oBWvtgT18M3AB58RGqA",
-  authDomain: "mondial2026-83b17.firebaseapp.com",
-  databaseURL: "https://mondial2026-83b17-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "mondial2026-83b17",
-  storageBucket: "mondial2026-83b17.firebasestorage.app",
-  messagingSenderId: "1059256750141",
-  appId: "1:1059256750141:web:f15c154a20c11830349a54"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-function fbSet(path, value){
-  db.ref(path).set(value).catch(err=>console.error('Firebase write error:', err));
-}
-
-// Lecture temps réel
-db.ref('data').on('value', snap=>{
-  const d = snap.val() || {};
-  Object.assign(SR, d.SR || {});
-  Object.assign(SP, d.SP || {});
-  Object.assign(KR, d.KR || {});
-  Object.assign(KP, d.KP || {});
-  render();
-});
-
-// Indicateur connexion
-const statusEl = document.getElementById('fb-status');
-db.ref('.info/connected').on('value', snap=>{
-  if(statusEl) statusEl.textContent = snap.val() ? '🟢 Connecté' : '🔴 Hors ligne';
-});
-
 // ══════════════════════════════════════════
 //  DONNÉES GROUPES
 // ══════════════════════════════════════════
@@ -347,6 +317,9 @@ const KO_LABELS={seiziemes:"SEIZIÈMES DE FINALE",huitiemes:"HUITIÈMES DE FINAL
 //  ÉTAT
 // ══════════════════════════════════════════
 const SR={},SP={},KR={},KP={};
+
+// fbSet par défaut (no-op) — remplacé après init Firebase
+window.fbSet = function(path, value){ /* Firebase pas encore init */ };
 
 // ══════════════════════════════════════════
 //  BLOCAGE DES PRONOS — vérif heure match
@@ -615,7 +588,7 @@ function dtc(d,hr){
 
 function scoreCell(mid,isKO,locked){
   const r=(isKO?KR:SR)[mid]||{h:'',a:''};
-  const dis=locked?'':'disabled title="Saisie activée après le coup d'envoi"';
+  const dis=locked?'':'disabled title="Saisie activée après le coup d\'envoi"';
   return`<td class="sc"><div class="sw">
     <input class="si" type="number" min="0" max="99" placeholder="–" value="${r.h??''}" data-mid="${mid}" data-side="h" data-ko="${isKO?1:0}" ${dis}>
     <span class="sep-sc">:</span>
@@ -914,9 +887,59 @@ document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',
   document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
 }));
 
-// Premier rendu (avant réponse Firebase)
+// ══════════════════════════════════════════
+//  INIT — rendu immédiat + Firebase + polling
+// ══════════════════════════════════════════
+
+// 1. Rendu immédiat (page visible sans attendre Firebase)
 render();
-// Démarrer le polling des scores (toutes les 2 min)
+
+// 2. Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyCDWqSy-WfuC5c4oBWvtgT18M3AB58RGqA",
+  authDomain: "mondial2026-83b17.firebaseapp.com",
+  databaseURL: "https://mondial2026-83b17-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mondial2026-83b17",
+  storageBucket: "mondial2026-83b17.firebasestorage.app",
+  messagingSenderId: "1059256750141",
+  appId: "1:1059256750141:web:f15c154a20c11830349a54"
+};
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Écriture
+  window.fbSet = function(path, value){
+    db.ref(path).set(value).catch(err=>console.error('Firebase write error:', err));
+  };
+
+  // Lecture temps réel — met à jour et re-render à chaque changement
+  db.ref('data').on('value', snap=>{
+    const d = snap.val() || {};
+    // Merge sans écraser (pour ne pas perdre les saisies locales en transit)
+    Object.keys(d.SR||{}).forEach(k=>SR[k]=d.SR[k]);
+    Object.keys(d.SP||{}).forEach(k=>SP[k]=d.SP[k]);
+    Object.keys(d.KR||{}).forEach(k=>KR[k]=d.KR[k]);
+    Object.keys(d.KP||{}).forEach(k=>KP[k]=d.KP[k]);
+    render();
+  }, err=>console.error('Firebase read error:', err));
+
+  // Indicateur de connexion
+  const statusEl = document.getElementById('fb-status');
+  db.ref('.info/connected').on('value', snap=>{
+    if(statusEl) statusEl.textContent = snap.val() ? '🟢 Connecté' : '🔴 Hors ligne';
+  });
+
+} catch(e) {
+  console.error('Firebase init error:', e);
+  const statusEl = document.getElementById('fb-status');
+  if(statusEl) statusEl.textContent = '🔴 Erreur Firebase';
+  // fbSet devient un no-op si Firebase échoue
+  window.fbSet = function(){};
+}
+
+// 3. Polling des scores API (toutes les 2 min)
 startScorePolling();
 </script>
 </body>
