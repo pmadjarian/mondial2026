@@ -188,7 +188,42 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
   <div class="section" id="tab-scores"></div>
   <div class="section" id="tab-tableau"></div>
 </main>
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+// ── Firebase init (compat SDK, pas de modules ES) ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCDWqSy-WfuC5c4oBWvtgT18M3AB58RGqA",
+  authDomain: "mondial2026-83b17.firebaseapp.com",
+  databaseURL: "https://mondial2026-83b17-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mondial2026-83b17",
+  storageBucket: "mondial2026-83b17.firebasestorage.app",
+  messagingSenderId: "1059256750141",
+  appId: "1:1059256750141:web:f15c154a20c11830349a54"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function fbSet(path, value){
+  db.ref(path).set(value).catch(err=>console.error('Firebase write error:', err));
+}
+
+// Lecture temps réel
+db.ref('data').on('value', snap=>{
+  const d = snap.val() || {};
+  Object.assign(SR, d.SR || {});
+  Object.assign(SP, d.SP || {});
+  Object.assign(KR, d.KR || {});
+  Object.assign(KP, d.KP || {});
+  render();
+});
+
+// Indicateur connexion
+const statusEl = document.getElementById('fb-status');
+db.ref('.info/connected').on('value', snap=>{
+  if(statusEl) statusEl.textContent = snap.val() ? '🟢 Connecté' : '🔴 Hors ligne';
+});
+
 // ══════════════════════════════════════════
 //  DONNÉES GROUPES
 // ══════════════════════════════════════════
@@ -840,51 +875,6 @@ function renderTableau(){
 
   document.getElementById('tab-tableau').innerHTML=html;
 }
-
-// ══════════════════════════════════════════
-//  FIREBASE
-// ══════════════════════════════════════════
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCDWqSy-WfuC5c4oBWvtgT18M3AB58RGqA",
-  authDomain: "mondial2026-83b17.firebaseapp.com",
-  databaseURL: "https://mondial2026-83b17-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "mondial2026-83b17",
-  storageBucket: "mondial2026-83b17.firebasestorage.app",
-  messagingSenderId: "1059256750141",
-  appId: "1:1059256750141:web:f15c154a20c11830349a54"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-
-// ── Écriture dans Firebase ──
-function fbSet(path, value){
-  set(ref(db, path), value).catch(err=>console.error('Firebase write error:', err));
-}
-
-// ── Lecture en temps réel ──
-// On écoute tout l'arbre d'un coup : /data
-onValue(ref(db,'data'), snap=>{
-  const d = snap.val() || {};
-  // Résultats groupes
-  Object.assign(SR, d.SR || {});
-  // Pronos groupes
-  Object.assign(SP, d.SP || {});
-  // Résultats KO
-  Object.assign(KR, d.KR || {});
-  // Pronos KO
-  Object.assign(KP, d.KP || {});
-  render();
-});
-
-// ── Indicateur de connexion ──
-const statusEl = document.getElementById('fb-status');
-onValue(ref(db,'.info/connected'), snap=>{
-  if(statusEl) statusEl.textContent = snap.val() ? '🟢 Connecté' : '🔴 Hors ligne';
-});
 
 // ══════════════════════════════════════════
 //  EVENTS
