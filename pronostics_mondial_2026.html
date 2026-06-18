@@ -172,7 +172,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v2.3</div>
+  <div class="version-badge">v2.4</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -317,7 +317,7 @@ const KO_DATES={
 };
 
 // Multiplicateurs de points par phase
-const KO_PTS={seiziemes:2,huitiemes:4,quarts:8,demis:16,finale:32};
+const KO_PTS={seiziemes:2,huitiemes:3,quarts:5,demis:7,finale:10};
 const KO_LABELS={seiziemes:"SEIZIÈMES DE FINALE",huitiemes:"HUITIÈMES DE FINALE",quarts:"QUARTS DE FINALE",demis:"DEMI-FINALES",finale:"FINALE"};
 
 // ══════════════════════════════════════════
@@ -701,10 +701,10 @@ function renderScores(){
   const allPhases=[
     {key:'groupes',  label:'Groupes',      detail:'72 matchs × 1 pt'},
     {key:'seiziemes',label:'Seizièmes',    detail:'16 matchs × 2 pts'},
-    {key:'huitiemes',label:'Huitièmes',    detail:'8 matchs × 4 pts'},
-    {key:'quarts',   label:'Quarts',       detail:'4 matchs × 8 pts'},
-    {key:'demis',    label:'Demi-finales', detail:'2 matchs × 16 pts'},
-    {key:'finale',   label:'Finale',       detail:'2 matchs × 32 pts'},
+    {key:'huitiemes',label:'Huitièmes',    detail:'8 matchs × 3 pts'},
+    {key:'quarts',   label:'Quarts',       detail:'4 matchs × 5 pts'},
+    {key:'demis',    label:'Demi-finales', detail:'2 matchs × 7 pts'},
+    {key:'finale',   label:'Finale',       detail:'2 matchs × 10 pts'},
   ];
   const maxT=Math.max(total('p'),total('s'),1);
 
