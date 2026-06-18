@@ -172,7 +172,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v2.2</div>
+  <div class="version-badge">v2.3</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -578,8 +578,19 @@ function ptDisp(v){
 //  RENDER
 // ══════════════════════════════════════════
 function render(){
-  // Sauvegarder la position de scroll avant de réécrire le DOM
+  // Sauvegarder la position de scroll
   const scrollY = window.scrollY;
+
+  // Sauvegarder le focus actif (input en cours de saisie) + position du curseur
+  const active = document.activeElement;
+  let activeMid=null, activeSide=null, activeKo=null, activeSelStart=null, activeSelEnd=null;
+  if(active && active.classList && active.classList.contains('si')){
+    activeMid  = active.dataset.mid;
+    activeSide = active.dataset.side;
+    activeKo   = active.dataset.ko;
+    activeSelStart = active.selectionStart;
+    activeSelEnd   = active.selectionEnd;
+  }
 
   renderGroupes();
   renderKO('seiziemes');
@@ -596,7 +607,19 @@ function render(){
 
   bindEvents();
 
-  // Restaurer la position de scroll après le re-render
+  // Restaurer le focus + curseur sur le même input si on était en train d'y taper
+  if(activeMid){
+    const sel = `.si[data-mid="${activeMid}"][data-side="${activeSide}"][data-ko="${activeKo}"]`;
+    const newInput = document.querySelector(sel);
+    if(newInput){
+      newInput.focus();
+      if(activeSelStart!=null){
+        try{ newInput.setSelectionRange(activeSelStart, activeSelEnd); }catch(e){}
+      }
+    }
+  }
+
+  // Restaurer la position de scroll (après le focus, qui peut aussi scroller)
   window.scrollTo(0, scrollY);
 }
 
