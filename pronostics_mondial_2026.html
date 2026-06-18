@@ -172,7 +172,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v2.1</div>
+  <div class="version-badge">v2.2</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -578,6 +578,9 @@ function ptDisp(v){
 //  RENDER
 // ══════════════════════════════════════════
 function render(){
+  // Sauvegarder la position de scroll avant de réécrire le DOM
+  const scrollY = window.scrollY;
+
   renderGroupes();
   renderKO('seiziemes');
   renderKO('huitiemes');
@@ -592,6 +595,9 @@ function render(){
   document.getElementById('tl').textContent=total('l');
 
   bindEvents();
+
+  // Restaurer la position de scroll après le re-render
+  window.scrollTo(0, scrollY);
 }
 
 function renderGroupes(){
