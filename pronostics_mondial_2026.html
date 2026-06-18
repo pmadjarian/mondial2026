@@ -33,6 +33,11 @@ tr.row-started td.dt .tl{color:var(--green)}
 tr.row-started td.dt::after{content:'▶';font-size:7px;color:var(--green);margin-left:3px;vertical-align:middle}
 .prono-ts{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);text-align:center;margin-top:3px;min-height:10px;opacity:.7;letter-spacing:0.3px}
 .version-badge{position:absolute;top:8px;right:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:2px 6px;letter-spacing:1px;opacity:.7}
+.admin-gear{position:absolute;top:7px;right:62px;background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-size:11px;cursor:pointer;opacity:.5;transition:opacity .2s,border-color .2s}
+.admin-gear:hover{opacity:1}
+.admin-gear.admin-on{opacity:1;border-color:var(--green);background:#0f2e14;box-shadow:0 0 6px rgba(53,217,122,.4)}
+.admin-banner{display:none;background:#0f2e14;border:1px solid var(--green);color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-align:center;padding:5px;position:sticky;top:0;z-index:195}
+.admin-banner.show{display:block}
 header{position:relative}
 ::-webkit-scrollbar{display:none}
 .nav-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:10px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0}
@@ -167,8 +172,10 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v1.9</div>
+  <div class="version-badge">v2.1</div>
+  <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
+<div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
 <nav class="nav">
   <button class="nav-btn active" data-tab="groupes">Groupes</button>
   <div class="nav-sep"></div>
@@ -209,79 +216,79 @@ const G={
     {h:"Canada",a:"Bosnie-Herzégovine",d:"ven. 12 juin",hr:"21:00",iso:"2026-06-12T19:00:00Z"},
     {h:"Qatar",a:"Suisse",d:"sam. 13 juin",hr:"21:00",iso:"2026-06-13T19:00:00Z"},
     {h:"Suisse",a:"Bosnie-Herzégovine",d:"jeu. 18 juin",hr:"21:00",iso:"2026-06-18T19:00:00Z"},
-    {h:"Canada",a:"Qatar",d:"ven. 19 juin",hr:"21:00",iso:"2026-06-19T19:00:00Z"},
-    {h:"Bosnie-Herzégovine",a:"Canada",d:"mer. 24 juin",hr:"21:00",iso:"2026-06-24T19:00:00Z"},
-    {h:"Suisse",a:"Qatar",d:"mer. 24 juin",hr:"21:00",iso:"2026-06-24T19:00:00Z"}]},
+    {h:"Canada",a:"Qatar",d:"ven. 19 juin",hr:"03:00",iso:"2026-06-19T01:00:00Z"},
+    {h:"Suisse",a:"Canada",d:"mer. 24 juin",hr:"21:00",iso:"2026-06-24T19:00:00Z"},
+    {h:"Bosnie-Herzégovine",a:"Qatar",d:"mer. 24 juin",hr:"21:00",iso:"2026-06-24T19:00:00Z"}]},
   C:{t:["Brésil","Maroc","Haïti","Écosse"],m:[
     {h:"Brésil",a:"Maroc",d:"dim. 14 juin",hr:"00:00",iso:"2026-06-13T22:00:00Z"},
     {h:"Haïti",a:"Écosse",d:"dim. 14 juin",hr:"03:00",iso:"2026-06-14T01:00:00Z"},
     {h:"Écosse",a:"Maroc",d:"sam. 20 juin",hr:"00:00",iso:"2026-06-19T22:00:00Z"},
     {h:"Brésil",a:"Haïti",d:"sam. 20 juin",hr:"03:00",iso:"2026-06-20T01:00:00Z"},
-    {h:"Maroc",a:"Brésil",d:"mer. 25 juin",hr:"00:00"},
-    {h:"Écosse",a:"Haïti",d:"mer. 25 juin",hr:"00:00"}]},
+    {h:"Écosse",a:"Brésil",d:"jeu. 25 juin",hr:"00:00",iso:"2026-06-24T22:00:00Z"},
+    {h:"Maroc",a:"Haïti",d:"jeu. 25 juin",hr:"00:00",iso:"2026-06-24T22:00:00Z"}]},
   D:{t:["États-Unis","Paraguay","Australie","Turquie"],m:[
     {h:"États-Unis",a:"Paraguay",d:"sam. 13 juin",hr:"03:00",iso:"2026-06-13T01:00:00Z"},
     {h:"Australie",a:"Turquie",d:"dim. 14 juin",hr:"06:00",iso:"2026-06-14T04:00:00Z"},
-    {h:"Turquie",a:"États-Unis",d:"jeu. 19 juin",hr:"21:00"},
-    {h:"Paraguay",a:"Australie",d:"ven. 20 juin",hr:"00:00"},
-    {h:"Turquie",a:"Paraguay",d:"jeu. 26 juin",hr:"00:00"},
-    {h:"Australie",a:"États-Unis",d:"jeu. 26 juin",hr:"00:00"}]},
+    {h:"États-Unis",a:"Australie",d:"ven. 19 juin",hr:"21:00",iso:"2026-06-19T19:00:00Z"},
+    {h:"Turquie",a:"Paraguay",d:"sam. 20 juin",hr:"06:00",iso:"2026-06-20T04:00:00Z"},
+    {h:"Turquie",a:"États-Unis",d:"ven. 26 juin",hr:"04:00",iso:"2026-06-26T02:00:00Z"},
+    {h:"Paraguay",a:"Australie",d:"ven. 26 juin",hr:"04:00",iso:"2026-06-26T02:00:00Z"}]},
   E:{t:["Allemagne","Curaçao","Côte d'Ivoire","Équateur"],m:[
-    {h:"Allemagne",a:"Curaçao",d:"dim. 14 juin",hr:"22:00",iso:"2026-06-14T20:00:00Z"},
+    {h:"Allemagne",a:"Curaçao",d:"dim. 14 juin",hr:"19:00",iso:"2026-06-14T17:00:00Z"},
     {h:"Côte d'Ivoire",a:"Équateur",d:"lun. 15 juin",hr:"01:00",iso:"2026-06-14T23:00:00Z"},
     {h:"Allemagne",a:"Côte d'Ivoire",d:"sam. 20 juin",hr:"22:00",iso:"2026-06-20T20:00:00Z"},
-    {h:"Équateur",a:"Curaçao",d:"dim. 21 juin",hr:"01:00",iso:"2026-06-20T23:00:00Z"},
-    {h:"Curaçao",a:"Côte d'Ivoire",d:"jeu. 25 juin",hr:"22:00",iso:"2026-06-25T20:00:00Z"},
-    {h:"Équateur",a:"Allemagne",d:"jeu. 25 juin",hr:"22:00",iso:"2026-06-25T20:00:00Z"}]},
+    {h:"Équateur",a:"Curaçao",d:"dim. 21 juin",hr:"02:00",iso:"2026-06-21T00:00:00Z"},
+    {h:"Équateur",a:"Allemagne",d:"jeu. 25 juin",hr:"22:00",iso:"2026-06-25T20:00:00Z"},
+    {h:"Curaçao",a:"Côte d'Ivoire",d:"jeu. 25 juin",hr:"22:00",iso:"2026-06-25T20:00:00Z"}]},
   F:{t:["Pays-Bas","Japon","Suède","Tunisie"],m:[
     {h:"Pays-Bas",a:"Japon",d:"dim. 14 juin",hr:"22:00",iso:"2026-06-14T20:00:00Z"},
     {h:"Suède",a:"Tunisie",d:"lun. 15 juin",hr:"04:00",iso:"2026-06-15T02:00:00Z"},
-    {h:"Tunisie",a:"Japon",d:"sam. 20 juin",hr:"03:00",iso:"2026-06-20T01:00:00Z"},
-    {h:"Pays-Bas",a:"Suède",d:"dim. 21 juin",hr:"00:00",iso:"2026-06-20T22:00:00Z"},
-    {h:"Japon",a:"Suède",d:"jeu. 25 juin",hr:"03:00",iso:"2026-06-25T01:00:00Z"},
-    {h:"Tunisie",a:"Pays-Bas",d:"jeu. 25 juin",hr:"03:00",iso:"2026-06-25T01:00:00Z"}]},
+    {h:"Pays-Bas",a:"Suède",d:"sam. 20 juin",hr:"19:00",iso:"2026-06-20T17:00:00Z"},
+    {h:"Tunisie",a:"Japon",d:"dim. 21 juin",hr:"06:00",iso:"2026-06-21T04:00:00Z"},
+    {h:"Tunisie",a:"Pays-Bas",d:"ven. 26 juin",hr:"01:00",iso:"2026-06-25T23:00:00Z"},
+    {h:"Japon",a:"Suède",d:"ven. 26 juin",hr:"01:00",iso:"2026-06-25T23:00:00Z"}]},
   G:{t:["Belgique","Égypte","Iran","Nouvelle-Zélande"],m:[
     {h:"Belgique",a:"Égypte",d:"lun. 15 juin",hr:"21:00",iso:"2026-06-15T19:00:00Z"},
     {h:"Iran",a:"Nouvelle-Zélande",d:"mar. 16 juin",hr:"03:00",iso:"2026-06-16T01:00:00Z"},
     {h:"Belgique",a:"Iran",d:"dim. 21 juin",hr:"21:00",iso:"2026-06-21T19:00:00Z"},
     {h:"Nouvelle-Zélande",a:"Égypte",d:"lun. 22 juin",hr:"03:00",iso:"2026-06-22T01:00:00Z"},
-    {h:"Égypte",a:"Iran",d:"sam. 27 juin",hr:"05:00",iso:"2026-06-27T03:00:00Z"},
-    {h:"Nouvelle-Zélande",a:"Belgique",d:"sam. 27 juin",hr:"05:00",iso:"2026-06-27T03:00:00Z"}]},
+    {h:"Nouvelle-Zélande",a:"Belgique",d:"sam. 27 juin",hr:"05:00",iso:"2026-06-27T03:00:00Z"},
+    {h:"Égypte",a:"Iran",d:"sam. 27 juin",hr:"05:00",iso:"2026-06-27T03:00:00Z"}]},
   H:{t:["Espagne","Cap-Vert","Arabie Saoudite","Uruguay"],m:[
-    {h:"Espagne",a:"Cap-Vert",d:"dim. 15 juin",hr:"18:00",iso:"2026-06-15T16:00:00Z"},
-    {h:"Arabie Saoudite",a:"Uruguay",d:"lun. 15 juin",hr:"21:00",iso:"2026-06-15T19:00:00Z"},
-    {h:"Espagne",a:"Arabie Saoudite",d:"sam. 21 juin",hr:"18:00"},
-    {h:"Cap-Vert",a:"Uruguay",d:"dim. 21 juin",hr:"21:00",iso:"2026-06-21T19:00:00Z"},
-    {h:"Cap-Vert",a:"Arabie Saoudite",d:"ven. 27 juin",hr:"01:00"},
-    {h:"Uruguay",a:"Espagne",d:"ven. 27 juin",hr:"02:00"}]},
+    {h:"Espagne",a:"Cap-Vert",d:"lun. 15 juin",hr:"18:00",iso:"2026-06-15T16:00:00Z"},
+    {h:"Arabie Saoudite",a:"Uruguay",d:"mar. 16 juin",hr:"00:00",iso:"2026-06-15T22:00:00Z"},
+    {h:"Espagne",a:"Arabie Saoudite",d:"dim. 21 juin",hr:"18:00",iso:"2026-06-21T16:00:00Z"},
+    {h:"Uruguay",a:"Cap-Vert",d:"lun. 22 juin",hr:"00:00",iso:"2026-06-21T22:00:00Z"},
+    {h:"Uruguay",a:"Espagne",d:"sam. 27 juin",hr:"02:00",iso:"2026-06-27T00:00:00Z"},
+    {h:"Cap-Vert",a:"Arabie Saoudite",d:"sam. 27 juin",hr:"02:00",iso:"2026-06-27T00:00:00Z"}]},
   I:{t:["France","Sénégal","Irak","Norvège"],m:[
     {h:"France",a:"Sénégal",d:"mar. 16 juin",hr:"21:00",iso:"2026-06-16T19:00:00Z"},
-    {h:"Irak",a:"Norvège",d:"mer. 17 juin",hr:"00:00",iso:"2026-06-16T22:00:00Z"},
+    {h:"Irak",a:"Norvège",d:"mer. 17 juin",hr:"04:00",iso:"2026-06-17T02:00:00Z"},
     {h:"France",a:"Irak",d:"lun. 22 juin",hr:"23:00",iso:"2026-06-22T21:00:00Z"},
-    {h:"Sénégal",a:"Norvège",d:"mar. 23 juin",hr:"02:00",iso:"2026-06-23T00:00:00Z"},
-    {h:"Sénégal",a:"Irak",d:"ven. 26 juin",hr:"21:00",iso:"2026-06-26T19:00:00Z"},
-    {h:"Norvège",a:"France",d:"ven. 26 juin",hr:"21:00",iso:"2026-06-26T19:00:00Z"}]},
+    {h:"Norvège",a:"Sénégal",d:"mar. 23 juin",hr:"02:00",iso:"2026-06-23T00:00:00Z"},
+    {h:"Norvège",a:"France",d:"ven. 26 juin",hr:"21:00",iso:"2026-06-26T19:00:00Z"},
+    {h:"Sénégal",a:"Irak",d:"ven. 26 juin",hr:"21:00",iso:"2026-06-26T19:00:00Z"}]},
   J:{t:["Argentine","Algérie","Autriche","Jordanie"],m:[
     {h:"Argentine",a:"Algérie",d:"mer. 17 juin",hr:"03:00",iso:"2026-06-17T01:00:00Z"},
     {h:"Autriche",a:"Jordanie",d:"mer. 17 juin",hr:"06:00",iso:"2026-06-17T04:00:00Z"},
     {h:"Argentine",a:"Autriche",d:"lun. 22 juin",hr:"19:00",iso:"2026-06-22T17:00:00Z"},
     {h:"Jordanie",a:"Algérie",d:"mar. 23 juin",hr:"05:00",iso:"2026-06-23T03:00:00Z"},
-    {h:"Algérie",a:"Autriche",d:"dim. 28 juin",hr:"04:00",iso:"2026-06-28T02:00:00Z"},
-    {h:"Jordanie",a:"Argentine",d:"dim. 28 juin",hr:"04:00",iso:"2026-06-28T02:00:00Z"}]},
+    {h:"Jordanie",a:"Argentine",d:"dim. 28 juin",hr:"04:00",iso:"2026-06-28T02:00:00Z"},
+    {h:"Algérie",a:"Autriche",d:"dim. 28 juin",hr:"04:00",iso:"2026-06-28T02:00:00Z"}]},
   K:{t:["Portugal","RD Congo","Ouzbékistan","Colombie"],m:[
     {h:"Portugal",a:"RD Congo",d:"mer. 17 juin",hr:"19:00",iso:"2026-06-17T17:00:00Z"},
     {h:"Ouzbékistan",a:"Colombie",d:"jeu. 18 juin",hr:"04:00",iso:"2026-06-18T02:00:00Z"},
-    {h:"Portugal",a:"Ouzbékistan",d:"mer. 24 juin",hr:"03:00",iso:"2026-06-24T01:00:00Z"},
-    {h:"Colombie",a:"RD Congo",d:"mer. 24 juin",hr:"00:00",iso:"2026-06-23T22:00:00Z"},
-    {h:"RD Congo",a:"Ouzbékistan",d:"dim. 28 juin",hr:"02:00",iso:"2026-06-28T00:00:00Z"},
-    {h:"Colombie",a:"Portugal",d:"lun. 29 juin",hr:"00:00",iso:"2026-06-28T22:00:00Z"}]},
+    {h:"Portugal",a:"Ouzbékistan",d:"mar. 23 juin",hr:"19:00",iso:"2026-06-23T17:00:00Z"},
+    {h:"Colombie",a:"RD Congo",d:"mer. 24 juin",hr:"04:00",iso:"2026-06-24T02:00:00Z"},
+    {h:"Colombie",a:"Portugal",d:"dim. 28 juin",hr:"01:30",iso:"2026-06-27T23:30:00Z"},
+    {h:"RD Congo",a:"Ouzbékistan",d:"dim. 28 juin",hr:"01:30",iso:"2026-06-27T23:30:00Z"}]},
   L:{t:["Angleterre","Croatie","Ghana","Panama"],m:[
     {h:"Angleterre",a:"Croatie",d:"mer. 17 juin",hr:"22:00",iso:"2026-06-17T20:00:00Z"},
     {h:"Ghana",a:"Panama",d:"jeu. 18 juin",hr:"01:00",iso:"2026-06-17T23:00:00Z"},
-    {h:"Croatie",a:"Ghana",d:"mar. 23 juin",hr:"22:00",iso:"2026-06-23T20:00:00Z"},
-    {h:"Angleterre",a:"Panama",d:"mer. 24 juin",hr:"01:00",iso:"2026-06-23T23:00:00Z"},
-    {h:"Angleterre",a:"Ghana",d:"dim. 28 juin",hr:"23:00",iso:"2026-06-28T21:00:00Z"},
-    {h:"Panama",a:"Croatie",d:"lun. 29 juin",hr:"01:00",iso:"2026-06-28T23:00:00Z"}]}
+    {h:"Angleterre",a:"Ghana",d:"mar. 23 juin",hr:"22:00",iso:"2026-06-23T20:00:00Z"},
+    {h:"Panama",a:"Croatie",d:"mer. 24 juin",hr:"01:00",iso:"2026-06-23T23:00:00Z"},
+    {h:"Panama",a:"Angleterre",d:"sam. 27 juin",hr:"23:00",iso:"2026-06-27T21:00:00Z"},
+    {h:"Croatie",a:"Ghana",d:"sam. 27 juin",hr:"23:00",iso:"2026-06-27T21:00:00Z"}]}
 };
 
 // Dates/heures des matchs KO (fixes)
@@ -317,6 +324,7 @@ const KO_LABELS={seiziemes:"SEIZIÈMES DE FINALE",huitiemes:"HUITIÈMES DE FINAL
 //  ÉTAT
 // ══════════════════════════════════════════
 const SR={},SP={},KR={},KP={};
+let adminMode=false; // déverrouillé temporairement après mot de passe
 
 // fbSet par défaut (no-op) — remplacé après init Firebase
 window.fbSet = function(path, value){ /* Firebase pas encore init */ };
@@ -330,11 +338,13 @@ function isMatchStarted(isoStr){
 }
 
 function isGroupMatchLocked(g,i){
+  if(adminMode) return false;
   const m=G[g].m[i];
   return m.iso ? isMatchStarted(m.iso) : false;
 }
 
 function isKOMatchLocked(phase,i){
+  if(adminMode) return false;
   const dt=KO_DATES[phase][i];
   return dt && dt.iso ? isMatchStarted(dt.iso) : false;
 }
@@ -596,7 +606,7 @@ function renderGroupes(){
     h+=`</tbody></table></div>`;
     const st=standG(g);
     h+=`<div class="stand">`;
-    st.forEach((t,i)=>h+=`<span class="r${i<2?i+1:3}">${i+1}. <b>${t}</b></span>`);
+    st.forEach((t,i)=>h+=`<span class="r${i<2?i+1:3}">${i+1}. <b>${t.name}</b></span>`);
     h+=`</div>`;
   });
   document.getElementById('tab-groupes').innerHTML=h;
@@ -806,6 +816,33 @@ document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',
   btn.classList.add('active');
   document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
 }));
+
+// ── Mode admin (déverrouillage temporaire des pronos) ──
+const ADMIN_PASSWORD = "allezlom";
+document.getElementById('admin-gear').addEventListener('click', ()=>{
+  const gearBtn = document.getElementById('admin-gear');
+  const banner  = document.getElementById('admin-banner');
+
+  if(adminMode){
+    // Reverrouiller directement, pas besoin de mot de passe
+    adminMode = false;
+    gearBtn.classList.remove('admin-on');
+    banner.classList.remove('show');
+    render();
+    return;
+  }
+
+  const pwd = prompt("Mot de passe admin :");
+  if(pwd === null) return; // annulé
+  if(pwd.trim().toLowerCase() === ADMIN_PASSWORD){
+    adminMode = true;
+    gearBtn.classList.add('admin-on');
+    banner.classList.add('show');
+    render();
+  } else {
+    alert("Mot de passe incorrect.");
+  }
+});
 
 // ══════════════════════════════════════════
 //  INIT — rendu immédiat + Firebase + polling
