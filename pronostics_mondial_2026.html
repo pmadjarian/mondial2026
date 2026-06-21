@@ -121,6 +121,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
 .stlead.lead-pat{background:#2a2000;color:var(--gold);border:1px solid var(--gold)}
 .stlead.lead-san{background:#0d1e3a;color:var(--blue);border:1px solid var(--blue)}
 .stlead.lead-tie{background:var(--surf2);color:var(--muted);border:1px solid var(--border)}
+
 /* ── TABLEAU DES GROUPES ── */
 .pool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px;margin-top:4px}
 .pool-card{background:var(--surf2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
@@ -172,7 +173,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v2.4</div>
+  <div class="version-badge">v2.6</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -745,6 +746,22 @@ function renderScores(){
     </div>`;
 }
 
+// Codes pays 3 lettres (style FIFA)
+const TEAM_CODE = {
+  "Mexique":"MEX","Afrique du Sud":"RSA","Corée du Sud":"KOR","Tchéquie":"CZE",
+  "Canada":"CAN","Bosnie-Herzégovine":"BIH","Qatar":"QAT","Suisse":"SUI",
+  "Brésil":"BRA","Maroc":"MAR","Haïti":"HAI","Écosse":"SCO",
+  "États-Unis":"USA","Paraguay":"PAR","Australie":"AUS","Turquie":"TUR",
+  "Allemagne":"GER","Curaçao":"CUW","Côte d'Ivoire":"CIV","Équateur":"ECU",
+  "Pays-Bas":"NED","Japon":"JPN","Suède":"SWE","Tunisie":"TUN",
+  "Belgique":"BEL","Égypte":"EGY","Iran":"IRN","Nouvelle-Zélande":"NZL",
+  "Espagne":"ESP","Cap-Vert":"CPV","Arabie Saoudite":"KSA","Uruguay":"URU",
+  "France":"FRA","Sénégal":"SEN","Irak":"IRQ","Norvège":"NOR",
+  "Argentine":"ARG","Algérie":"ALG","Autriche":"AUT","Jordanie":"JOR",
+  "Portugal":"POR","RD Congo":"COD","Ouzbékistan":"UZB","Colombie":"COL",
+  "Angleterre":"ENG","Croatie":"CRO","Ghana":"GHA","Panama":"PAN",
+};
+
 function renderTableau(){
   let html=`<div class="phase-hd"><h2>TABLEAU DES GROUPES</h2><span class="pb">classements en temps réel</span></div>`;
   html+=`<div class="pool-grid">`;
@@ -758,19 +775,17 @@ function renderTableau(){
           <th class="left rank-th"></th>
           <th class="left team-th">Équipe</th>
           <th title="Matchs joués">J</th>
-          <th title="Victoires">V</th>
+          <th title="Victoires">G</th>
           <th title="Nuls">N</th>
-          <th title="Défaites">D</th>
-          <th title="Buts pour">BP</th>
-          <th title="Buts contre">BC</th>
-          <th title="Goal average">GA</th>
+          <th title="Défaites">P</th>
+          <th title="Différence de buts">Dif.</th>
           <th title="Points">Pts</th>
         </tr></thead>
         <tbody>`;
 
     rows.forEach((t,i)=>{
       const qual=i===0?'q1':i===1?'q2':'';
-      const ga=t.ga>0?`+${t.ga}`:t.ga;
+      const dif=t.ga>0?`+${t.ga}`:t.ga;
       const ptsStyle=i<2?'color:var(--gold);font-weight:700':'';
       html+=`<tr class="stand-row ${qual}">
         <td class="rank-cell"><span class="rank-badge rank-${i+1}">${i+1}</span></td>
@@ -779,14 +794,11 @@ function renderTableau(){
         <td class="stat-cell green-cell">${t.v}</td>
         <td class="stat-cell">${t.n}</td>
         <td class="stat-cell red-cell">${t.d}</td>
-        <td class="stat-cell">${t.bp}</td>
-        <td class="stat-cell">${t.bc}</td>
-        <td class="stat-cell ga-cell">${t.j>0?ga:'–'}</td>
+        <td class="stat-cell ga-cell">${t.j>0?dif:'–'}</td>
         <td class="stat-cell pts-cell" style="${ptsStyle}">${t.pts}</td>
       </tr>`;
     });
 
-    // Résultats des matchs du groupe
     html+=`</tbody></table>
       <div class="pool-matches">`;
     G[g].m.forEach((m,i)=>{
