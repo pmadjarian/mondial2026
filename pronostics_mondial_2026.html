@@ -65,6 +65,10 @@ td.sc{text-align:center;min-width:96px;background:var(--surf)}
 .si{width:36px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;text-align:center;padding:4px;transition:border-color .15s}
 .si:focus{outline:none;border-color:var(--gold)}.si::placeholder{color:var(--border)}
 .sep-sc{color:var(--muted);font-size:13px;font-family:'IBM Plex Mono',monospace}
+.pen-row{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--border)}
+.pen-label{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--red);letter-spacing:1px;margin-right:2px}
+.pen-si{width:28px!important;border-color:var(--red)!important;font-size:12px!important}
+.pen-tag{font-size:8px;color:var(--red);font-weight:400;letter-spacing:0.3px}
 td.res{text-align:center;min-width:54px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--gold)}
 td.pro{text-align:center;min-width:84px}
 .pbr{display:flex;gap:3px;justify-content:center}
@@ -173,7 +177,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v3.0</div>
+  <div class="version-badge">v3.1</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -417,7 +421,14 @@ function koWinner(phase,i){
   if(!teamH||!teamA)return null;
   if(hi>ai)return teamH;
   if(ai>hi)return teamA;
-  return null;
+  // Score nul : on regarde les tirs au but
+  if(r.ph!=null && r.pa!=null && r.ph!=='' && r.pa!==''){
+    const phi=parseInt(r.ph), pai=parseInt(r.pa);
+    if(!isNaN(phi) && !isNaN(pai) && phi!==pai){
+      return phi>pai?teamH:teamA;
+    }
+  }
+  return null; // nul sans T.A.B. saisis -> pas encore de vainqueur déterminé
 }
 
 // ── RÉSOLUTION DES ÉQUIPES DANS LES PHASES KO ──
@@ -535,15 +546,34 @@ function dtc(d,hr){
 function scoreCell(mid,isKO,locked){
   const r=(isKO?KR:SR)[mid]||{h:'',a:''};
   const dis=locked?'':'disabled title="Saisie activée après le coup d\'envoi"';
+  const isTied = isKO && r.h!=='' && r.a!=='' && r.h!=null && r.a!=null && String(r.h)===String(r.a);
+
+  let penHtml = '';
+  if(isKO && isTied){
+    penHtml = `<div class="pen-row">
+      <span class="pen-label">T.A.B.</span>
+      <input class="si pen-si" type="number" min="0" max="99" placeholder="–" value="${r.ph??''}" data-mid="${mid}" data-side="ph" data-ko="1" ${dis}>
+      <span class="sep-sc">:</span>
+      <input class="si pen-si" type="number" min="0" max="99" placeholder="–" value="${r.pa??''}" data-mid="${mid}" data-side="pa" data-ko="1" ${dis}>
+    </div>`;
+  }
+
   return`<td class="sc"><div class="sw">
     <input class="si" type="number" min="0" max="99" placeholder="–" value="${r.h??''}" data-mid="${mid}" data-side="h" data-ko="${isKO?1:0}" ${dis}>
     <span class="sep-sc">:</span>
     <input class="si" type="number" min="0" max="99" placeholder="–" value="${r.a??''}" data-mid="${mid}" data-side="a" data-ko="${isKO?1:0}" ${dis}>
-  </div></td>`
+  </div>${penHtml}</td>`
 }
 
 function resCell(mid,isKO){
   const r=(isKO?KR:SR)[mid],o=r?oc(r.h,r.a):null;
+  // En KO, si nul, afficher le résultat des T.A.B. au lieu de "N"
+  if(isKO && o==='N' && r.ph!=null && r.pa!=='' && r.ph!=='' && r.pa!=null){
+    const phi=parseInt(r.ph), pai=parseInt(r.pa);
+    if(!isNaN(phi) && !isNaN(pai) && phi!==pai){
+      return `<td class="res">${phi>pai?'1':'2'} <span class="pen-tag">(t.a.b.)</span></td>`;
+    }
+  }
   return`<td class="res">${o||'–'}</td>`
 }
 
