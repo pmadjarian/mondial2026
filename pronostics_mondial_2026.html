@@ -177,7 +177,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v3.1</div>
+  <div class="version-badge">v3.3</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -310,23 +310,31 @@ const KO_DATES={
     {d:"mer. 1 juil.",hr:"22:00",iso:"2026-07-01T20:00:00Z",h:"Belgique",a:"Sénégal"},
     {d:"jeu. 2 juil.",hr:"02:00",iso:"2026-07-02T00:00:00Z",h:"États-Unis",a:"Bosnie-Herzégovine"},
     {d:"jeu. 2 juil.",hr:"21:00",iso:"2026-07-02T19:00:00Z",h:"Espagne",a:"Autriche"},
-    {d:"ven. 3 juil.",hr:"01:00",iso:"2026-07-03T23:00:00Z",h:"Portugal",a:"Croatie"},
+    {d:"ven. 3 juil.",hr:"01:00",iso:"2026-07-02T23:00:00Z",h:"Portugal",a:"Croatie"},
     {d:"ven. 3 juil.",hr:"05:00",iso:"2026-07-03T03:00:00Z",h:"Suisse",a:"Algérie"},
     {d:"ven. 3 juil.",hr:"20:00",iso:"2026-07-03T18:00:00Z",h:"Australie",a:"Égypte"},
     {d:"sam. 4 juil.",hr:"00:00",iso:"2026-07-03T22:00:00Z",h:"Argentine",a:"Cap-Vert"},
     {d:"sam. 4 juil.",hr:"03:30",iso:"2026-07-04T01:30:00Z",h:"Colombie",a:"Ghana"}],
   huitiemes:[
-    {d:"ven. 11 juil.",hr:"02:00",iso:"2026-07-11T00:00:00Z"},{d:"ven. 11 juil.",hr:"22:00",iso:"2026-07-11T20:00:00Z"},
-    {d:"sam. 12 juil.",hr:"02:00",iso:"2026-07-12T00:00:00Z"},{d:"sam. 12 juil.",hr:"22:00",iso:"2026-07-12T20:00:00Z"},
-    {d:"dim. 13 juil.",hr:"02:00",iso:"2026-07-13T00:00:00Z"},{d:"dim. 13 juil.",hr:"22:00",iso:"2026-07-13T20:00:00Z"},
-    {d:"lun. 14 juil.",hr:"02:00",iso:"2026-07-14T00:00:00Z"},{d:"lun. 14 juil.",hr:"22:00",iso:"2026-07-14T20:00:00Z"}],
+    {d:"sam. 4 juil.",hr:"19:00",iso:"2026-07-04T17:00:00Z",h:"Canada",a:"Maroc"},
+    {d:"sam. 4 juil.",hr:"23:00",iso:"2026-07-04T21:00:00Z",h:"Paraguay",a:"France"},
+    {d:"dim. 5 juil.",hr:"22:00",iso:"2026-07-05T20:00:00Z",h:"Brésil",a:"Norvège"},
+    {d:"lun. 6 juil.",hr:"02:00",iso:"2026-07-06T00:00:00Z",h:"Mexique",a:"Angleterre"},
+    {d:"lun. 6 juil.",hr:"21:00",iso:"2026-07-06T19:00:00Z",h:"Portugal",a:"Espagne"},
+    {d:"mar. 7 juil.",hr:"01:00",iso:"2026-07-07T23:00:00Z",h:"États-Unis",a:"Belgique"},
+    {d:"mar. 7 juil.",hr:"18:00",iso:"2026-07-07T16:00:00Z",h:"Argentine",a:"Égypte"},
+    {d:"mar. 7 juil.",hr:"22:00",iso:"2026-07-07T20:00:00Z",h:"Suisse",a:"Colombie"}],
   quarts:[
-    {d:"mer. 16 juil.",hr:"00:00",iso:"2026-07-15T22:00:00Z"},{d:"mer. 16 juil.",hr:"22:00",iso:"2026-07-16T20:00:00Z"},
-    {d:"jeu. 17 juil.",hr:"02:00",iso:"2026-07-17T00:00:00Z"},{d:"jeu. 17 juil.",hr:"22:00",iso:"2026-07-17T20:00:00Z"}],
+    {d:"jeu. 9 juil.",hr:"21:00",iso:"2026-07-09T19:00:00Z"},
+    {d:"ven. 10 juil.",hr:"01:00",iso:"2026-07-09T23:00:00Z"},
+    {d:"ven. 10 juil.",hr:"22:00",iso:"2026-07-10T20:00:00Z"},
+    {d:"sam. 11 juil.",hr:"02:00",iso:"2026-07-11T00:00:00Z"}],
   demis:[
-    {d:"sam. 21 juil.",hr:"02:00",iso:"2026-07-21T00:00:00Z"},{d:"dim. 22 juil.",hr:"02:00",iso:"2026-07-22T00:00:00Z"}],
+    {d:"mar. 14 juil.",hr:"21:00",iso:"2026-07-14T19:00:00Z"},
+    {d:"mer. 15 juil.",hr:"21:00",iso:"2026-07-15T19:00:00Z"}],
   finale:[
-    {d:"dim. 26 juil.",hr:"21:00",iso:"2026-07-26T19:00:00Z"},{d:"sam. 25 juil.",hr:"20:00",iso:"2026-07-25T18:00:00Z"}]
+    {d:"dim. 19 juil.",hr:"21:00",iso:"2026-07-19T19:00:00Z"},
+    {d:"sam. 18 juil.",hr:"21:00",iso:"2026-07-18T19:00:00Z"}]
 };
 
 // Multiplicateurs de points par phase
@@ -409,10 +417,9 @@ function koWinner(phase,i){
   if(!r||r.h===''||r.a==='')return null;
   const hi=parseInt(r.h),ai=parseInt(r.a);
   if(isNaN(hi)||isNaN(ai))return null;
-  // Pour les 1/16, les équipes sont en dur dans KO_DATES
   let teamH, teamA;
-  if(phase==='seiziemes'){
-    const dt=KO_DATES.seiziemes[i];
+  if(phase==='seiziemes' || phase==='huitiemes'){
+    const dt=KO_DATES[phase][i];
     teamH=dt.h; teamA=dt.a;
   } else {
     const teams=koTeams(phase,i);
@@ -421,14 +428,14 @@ function koWinner(phase,i){
   if(!teamH||!teamA)return null;
   if(hi>ai)return teamH;
   if(ai>hi)return teamA;
-  // Score nul : on regarde les tirs au but
+  // Score nul : tirs au but
   if(r.ph!=null && r.pa!=null && r.ph!=='' && r.pa!==''){
     const phi=parseInt(r.ph), pai=parseInt(r.pa);
     if(!isNaN(phi) && !isNaN(pai) && phi!==pai){
       return phi>pai?teamH:teamA;
     }
   }
-  return null; // nul sans T.A.B. saisis -> pas encore de vainqueur déterminé
+  return null;
 }
 
 // ── RÉSOLUTION DES ÉQUIPES DANS LES PHASES KO ──
@@ -690,10 +697,10 @@ function renderGroupes(){
 function koMatchRow(phase,i,mult){
   const dt=KO_DATES[phase][i];
   const mid=kid(phase,i);
-  // Pour les 1/16 : équipes en dur dans les données
-  // Pour les autres phases : calculé depuis les vainqueurs
+  // 1/16 et 1/8 : équipes en dur dans les données
+  // Quarts, demis, finale : calculé depuis les vainqueurs
   let teamH, teamA;
-  if(phase==='seiziemes'){
+  if(phase==='seiziemes' || phase==='huitiemes'){
     teamH = dt.h || null;
     teamA = dt.a || null;
   } else {
