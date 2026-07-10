@@ -177,7 +177,7 @@ td.ko-team.tbd{color:var(--muted);font-style:italic;font-size:11px}
     <div class="scard san"><div class="name">Sandrine</div><div class="val" id="ts">0</div><div class="sub2">points</div></div>
     <div class="scard lou"><div class="name">Louis</div><div class="val" id="tl">0</div><div class="sub2">points</div></div>
   </div>
-  <div class="version-badge">v3.8</div>
+  <div class="version-badge">v3.9</div>
   <button class="admin-gear" id="admin-gear" title="Mode admin">⚙️</button>
 </header>
 <div class="admin-banner" id="admin-banner">🔓 MODE ADMIN ACTIF — les pronos des matchs commencés sont modifiables</div>
@@ -325,10 +325,10 @@ const KO_DATES={
     {d:"mar. 7 juil.",hr:"18:00",iso:"2026-07-07T16:00:00Z",h:"Argentine",a:"Égypte"},
     {d:"mar. 7 juil.",hr:"22:00",iso:"2026-07-07T20:00:00Z",h:"Suisse",a:"Colombie"}],
   quarts:[
-    {d:"jeu. 9 juil.",  hr:"22:00",iso:"2026-07-09T20:00:00Z"},
-    {d:"ven. 10 juil.", hr:"21:00",iso:"2026-07-10T19:00:00Z"},
-    {d:"sam. 11 juil.", hr:"23:00",iso:"2026-07-11T21:00:00Z"},
-    {d:"dim. 12 juil.", hr:"03:00",iso:"2026-07-12T01:00:00Z"}],
+    {d:"jeu. 9 juil.",  hr:"22:00",iso:"2026-07-09T20:00:00Z",h:"France",a:"Maroc"},
+    {d:"ven. 10 juil.", hr:"21:00",iso:"2026-07-10T19:00:00Z",h:"Espagne",a:"Belgique"},
+    {d:"sam. 11 juil.", hr:"23:00",iso:"2026-07-11T21:00:00Z",h:"Norvège",a:"Angleterre"},
+    {d:"dim. 12 juil.", hr:"03:00",iso:"2026-07-12T01:00:00Z",h:"Argentine",a:"Suisse"}],
   demis:[
     {d:"mar. 14 juil.", hr:"21:00",iso:"2026-07-14T19:00:00Z"},
     {d:"mer. 15 juil.", hr:"21:00",iso:"2026-07-15T19:00:00Z"}],
@@ -418,7 +418,7 @@ function koWinner(phase,i){
   const hi=parseInt(r.h),ai=parseInt(r.a);
   if(isNaN(hi)||isNaN(ai))return null;
   let teamH, teamA;
-  if(phase==='seiziemes' || phase==='huitiemes'){
+  if(phase==='seiziemes' || phase==='huitiemes' || phase==='quarts'){
     const dt=KO_DATES[phase][i];
     teamH=dt.h; teamA=dt.a;
   } else {
@@ -700,7 +700,7 @@ function koMatchRow(phase,i,mult){
   // 1/16 et 1/8 : équipes en dur dans les données
   // Quarts, demis, finale : calculé depuis les vainqueurs
   let teamH, teamA;
-  if(phase==='seiziemes' || phase==='huitiemes'){
+  if(phase==='seiziemes' || phase==='huitiemes' || phase==='quarts'){
     teamH = dt.h || null;
     teamA = dt.a || null;
   } else {
